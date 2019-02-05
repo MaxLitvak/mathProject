@@ -92,7 +92,7 @@ public class mathProject implements Runnable {
         block_0_color = new Color(170, 170, 170); // Color white
         block_1_color = new Color(50, 50, 50);
         block_zero_mass = 1;
-        block_one_mass = 1000000;
+        block_one_mass = 10;//Math.pow(100,-2);
         block_zero_velocity = 0;
         block_one_velocity = 10;
         block_zero_xpos = 300;
@@ -105,6 +105,15 @@ public class mathProject implements Runnable {
 
         collision();
         System.out.println("Number of Collisions: " + nOfCollisions);
+        for (int x = 0; x < 2; x++){
+            for (double[] a : Block[x].movement) {
+                System.out.println(a[0]+"          "+a[1]);
+            }
+            System.out.println("");
+            System.out.println("");
+            System.out.println("");
+            System.out.println("");
+        }
 
 
         while (true) {
@@ -132,9 +141,9 @@ public class mathProject implements Runnable {
         g.drawLine(100, 100, 100, 500);
         g.drawLine(100, 500, 700, 500);
         g.setColor(block_0_color);
-        g.fillRoundRect(Block[0].getXpos(), Block[0].getYpos(), Block[0].getWidth(), Block[0].getHeight(), 5, 5);
+        g.fillRoundRect((int) Block[0].getXpos(), Block[0].getYpos(), Block[0].getWidth(), Block[0].getHeight(), 5, 5);
         g.setColor(block_1_color);
-        g.fillRoundRect(Block[1].getXpos(), Block[1].getYpos(), Block[1].getWidth(), Block[1].getHeight(), 5, 5);
+        g.fillRoundRect((int) Block[1].getXpos(), Block[1].getYpos(), Block[1].getWidth(), Block[1].getHeight(), 5, 5);
 
 
         g.dispose();
@@ -154,6 +163,9 @@ public class mathProject implements Runnable {
             if(Block[1].getVelocity() >= 0){
                 if(Block[0].getVelocity() >= 0){
                     if(Block[1].getVelocity() > Block[0].getVelocity()){
+                        Block[0].add_movement(calculate_collision(Block[0].getXpos(), Block[1].getXpos(), Block[0].getVelocity(), Block[1].getVelocity(), false));
+                        Block[1].add_movement(calculate_collision(Block[0].getXpos(), Block[1].getXpos(), Block[0].getVelocity(), Block[1].getVelocity(), false));
+
                         double a_term = (Block[0].getMass()*Block[1].getMass() + Math.pow(Block[0].getMass(), 2));
                         double b_term = -1*(2*initial_momentum*Block[0].getMass());
                         double c_term = -2*initial_energy*Block[1].getMass() + Math.pow(initial_momentum, 2);
@@ -169,16 +181,18 @@ public class mathProject implements Runnable {
                         block1NewVelocity= (initial_momentum - Block[0].getMass()*block0NewVelocity) / Block[1].getMass();
 
                         Block[0].new_velocity(block0NewVelocity);
-                        Block[0].add_velocity(block0NewVelocity);
                         Block[1].new_velocity(block1NewVelocity);
-                        Block[1].add_velocity(block1NewVelocity);
-                        new_collision_site(block0NewVelocity,block1NewVelocity);
                     }
                     else{
+                        Block[0].add_movement(100);
+                        Block[1].add_movement(calculate_collision(Block[0].getXpos(), Block[1].getXpos(), Block[0].getVelocity(), Block[1].getVelocity(), true));
                         Block[0].new_velocity(Block[0].getVelocity() * -1);
                     }
                 }
                 else{
+                    Block[0].add_movement(calculate_collision(Block[0].getXpos(), Block[1].getXpos(), Block[0].getVelocity(), Block[1].getVelocity(), false));
+                    Block[1].add_movement(calculate_collision(Block[0].getXpos(), Block[1].getXpos(), Block[0].getVelocity(), Block[1].getVelocity(), false));
+
                     double a_term = (Block[0].getMass()*Block[1].getMass() + Math.pow(Block[0].getMass(), 2));
                     double b_term = -1*(2*initial_momentum*Block[0].getMass());
                     double c_term = -2*initial_energy*Block[1].getMass() + Math.pow(initial_momentum, 2);
@@ -194,18 +208,20 @@ public class mathProject implements Runnable {
                     block1NewVelocity= (initial_momentum - Block[0].getMass()*block0NewVelocity) / Block[1].getMass();
 
                     Block[0].new_velocity(block0NewVelocity);
-                    Block[0].add_velocity(block0NewVelocity);
                     Block[1].new_velocity(block1NewVelocity);
-                    Block[1].add_velocity(block1NewVelocity);
-                    new_collision_site(block0NewVelocity,block1NewVelocity);
                 }
             }
             else{
                 if(Block[0].getVelocity() >= 0){
+                    Block[0].add_movement(100);
+                    Block[1].add_movement(calculate_collision(Block[0].getXpos(), Block[1].getXpos(), Block[0].getVelocity(), Block[1].getVelocity(), true));
                     Block[0].new_velocity(Block[0].getVelocity() * -1);
                 }
                 else{
                     if(Block[0].getVelocity() < Block[1].getVelocity()){
+                        Block[0].add_movement(calculate_collision(Block[0].getXpos(), Block[1].getXpos(), Block[0].getVelocity(), Block[1].getVelocity(), false));
+                        Block[1].add_movement(calculate_collision(Block[0].getXpos(), Block[1].getXpos(), Block[0].getVelocity(), Block[1].getVelocity(), false));
+
                         double a_term = (Block[0].getMass()*Block[1].getMass() + Math.pow(Block[0].getMass(), 2));
                         double b_term = -1*(2*initial_momentum*Block[0].getMass());
                         double c_term = -2*initial_energy*Block[1].getMass() + Math.pow(initial_momentum, 2);
@@ -221,10 +237,7 @@ public class mathProject implements Runnable {
                         block1NewVelocity= (initial_momentum - Block[0].getMass()*block0NewVelocity) / Block[1].getMass();
 
                         Block[0].new_velocity(block0NewVelocity);
-                        Block[0].add_velocity(block0NewVelocity);
                         Block[1].new_velocity(block1NewVelocity);
-                        Block[1].add_velocity(block1NewVelocity);
-                        new_collision_site(block0NewVelocity,block1NewVelocity);
                     }
                     else{
                         finished = true;
@@ -264,7 +277,15 @@ public class mathProject implements Runnable {
         return roots;
     }
 
-    private void new_collision_site(double velocity1, double velocity2, boolean wall){
-
+    private double calculate_collision(double xpos1, double xpos2, double velocity1, double velocity2, boolean wall){
+        double collisionXpos = 0;
+        if (wall == false){
+            collisionXpos = ((xpos2 - xpos1) / (velocity1 - velocity2));
+            return collisionXpos;
+        } else{
+            double timeToWall = (100 - xpos1) / velocity1;
+            double object2Xpos = xpos2 - (velocity2 * timeToWall);
+            return object2Xpos;
+        }
     }
 }
