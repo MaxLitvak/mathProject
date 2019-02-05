@@ -1,3 +1,5 @@
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
 public class block {
@@ -9,7 +11,7 @@ public class block {
     private int height;
     private double momentum;
     private double kineticEnergy;
-    public ArrayList<double[]> movement = new ArrayList<>();
+    private Rectangle2D.Double rec;
 
     public block(double pmass, double pvelocity, int pxpos, int pypos){
         mass = pmass;
@@ -18,16 +20,14 @@ public class block {
         ypos = pypos;
         width = 100;
         height = 100;
-
+        rec = new Rectangle2D.Double(xpos, ypos, width, height);
     }
     public double getMass(){ return mass; }
     public double getVelocity(){ return velocity; }
     public double getXpos(){ return xpos; }
-    public int getYpos(){ return ypos; }
     public double getMomentum(){ return momentum; }
     public double getKineticEnergy(){ return kineticEnergy; }
-    public int getWidth(){ return width; }
-    public int getHeight(){ return height; }
+    public Rectangle2D.Double getRec(){ return rec; }
 
     public void calculate_momentum(){
         momentum = mass * velocity;
@@ -38,14 +38,8 @@ public class block {
     public void new_velocity(double newVelocity){
         velocity = newVelocity;
     }
-    public void add_movement(double tXpos){
-        double newMovement[] = new double[2];
-        newMovement[0] = velocity;
-        newMovement[1] = tXpos;
-        movement.add(newMovement);
-        xpos = tXpos;
-
-    }
+    public void new_xpos(double tXpos){ xpos = tXpos; }
+    public void new_rectange() {rec = new Rectangle.Double(xpos, ypos, width, height); }
 
 
 }
