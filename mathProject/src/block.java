@@ -39,7 +39,7 @@ public class block {
         velocity = newVelocity;
     }
     public void new_xpos(double tXpos){ xpos = tXpos; }
-    public void new_rectange() {rec = new Rectangle.Double(xpos, ypos, width, height); }
+    public void new_rectangle() {rec = new Rectangle.Double(xpos, ypos, width, height); }
 
 
 }

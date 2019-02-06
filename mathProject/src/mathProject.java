@@ -1,11 +1,8 @@
+import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferStrategy;
 import java.util.ArrayList;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import java.awt.Graphics;
 
 /*
 This is a simulation of two blocks of different mass and velocity colliding on a frictionless floor and with purely
@@ -27,20 +24,22 @@ public class mathProject implements Runnable {
     private double block_zero_mass;
     private double block_one_mass;
     private int block_zero_velocity;
-    private int block_one_velocity;
+    private double block_one_velocity;
     private int block_zero_xpos;
     private int block_one_xpos;
     private int block_zero_ypos;
     private int block_one_ypos;
     private double initial_energy;
     private double initial_momentum;
-    private boolean finished;
     private int count = 0;
     private Color block_0_color;
     private Color block_1_color;
     private int nOfCollisions;
     private block[] Block;
+    private int power;
     private ArrayList<double[]> points = new ArrayList<>();
+    private ArrayList<double[]> pointsXpos = new ArrayList<>();
+    private boolean finished = false;
 
 
     public mathProject() {
@@ -79,9 +78,10 @@ public class mathProject implements Runnable {
         block_0_color = new Color(170, 170, 170); // Color white
         block_1_color = new Color(50, 50, 50);
         block_zero_mass = 1;
-        block_one_mass = Math.pow(100, 1);
+        power = 2;
+        block_one_mass = Math.pow(100, power);
         block_zero_velocity = 0;
-        block_one_velocity = 10;
+        block_one_velocity = .5;
         block_zero_xpos = 300;
         block_one_xpos = 500;
         block_zero_ypos = 400;
@@ -90,20 +90,18 @@ public class mathProject implements Runnable {
         Block[0] = new block(block_zero_mass, block_zero_velocity, block_zero_xpos, block_zero_ypos);
         Block[1] = new block(block_one_mass, block_one_velocity, block_one_xpos, block_one_ypos);
 
-        collision();
-        System.out.println("Number of Collisions: " + nOfCollisions);
-
 
         while (true) {
             // paint the graphics
             render();
             // moves blocks
-            //moveEverything();
+            moveEverything();
+            System.out.println(nOfCollisions);
 
 
             //sleep
             try {
-                Thread.sleep(40);
+                Thread.sleep(1);
             } catch (InterruptedException e) {
 
             }
@@ -124,164 +122,152 @@ public class mathProject implements Runnable {
         g.setColor(block_1_color);
         g.fill(Block[1].getRec());
 
-        g.drawLine(500,300,870,300);
-        g.drawLine(500,50,500,300);
+        g.drawLine(500, 300, 870, 300);
+        g.drawLine(500, 50, 500, 300);
 
-        for (double[] a : points){
-            Rectangle2D.Double point = new Rectangle2D.Double(500+a[0]*Math.sqrt(Block[0].getMass()),300+a[1]*Math.sqrt(Block[1].getMass()),2,2);
+        for (double[] a : points) {
+            Rectangle2D.Double point = new Rectangle2D.Double(500 + a[0] * Math.sqrt(Block[0].getMass()), 300 + a[1] * Math.sqrt(Block[1].getMass()), 2, 2);
             g.fill(point);
         }
+
+        /*
+        if (finished == true) {
+            g.clearRect(0, 0, 800, 800);
+            g.drawLine(500, 300, 870, 300);
+            g.drawLine(500, 50, 500, 300);
+            System.out.println("finished");
+            double Count = 0;
+            for (double[] a : pointsXpos) {
+                Count += 0.07;
+                Rectangle2D.Double point = new Rectangle2D.Double(500 + Count, 300 + (a[0] / 5), 2, 2);
+                g.fill(point);
+                Rectangle2D.Double point2 = new Rectangle2D.Double(500 + Count, 300 + (a[1] / 5), 2, 2);
+                //g.fill(point2);
+            }
+        }
+        */
 
         g.dispose();
 
         bufferStrategy.show();
     }
 
-    //moves the blocks
+    // moves the blocks and counts collisions
     private void moveEverything() {
-        System.out.println("new");
+
         double newVelocity = 0;
         boolean closeToLine = false;
         double toLine = 0;
+        boolean noChange = false;
+        boolean stop = false;
 
-        if (Block[0].getVelocity() < 0 && Block[1].getVelocity() < 0 && Block[1].getVelocity() < Block[0].getVelocity()) {
-            if (count != 25) {
+        if (Block[0].getVelocity() <= 0 && Block[1].getVelocity() <= 0 && Block[1].getVelocity() <= Block[0].getVelocity()) {
+            finished = true;
+            if (count != 5) {
                 count++;
             }
         }
-        if (count == 100) {
+        if (count == 5) {
 
         } else {
-            if (Block[1].getXpos() - Block[1].getVelocity() < Block[0].getXpos()+100 - Block[0].getVelocity()) {
-                double intersectionStep1 = (Block[1].getXpos() - Block[0].getXpos()) / (Block[0].getVelocity() - Block[1].getVelocity());
-                double xposOfIntersection = Block[0].getVelocity() * intersectionStep1 + Block[0].getXpos();
-                Block[0].new_xpos(xposOfIntersection);
-                Block[1].new_xpos(xposOfIntersection);
-                calculate_new_velocity();
-            } else{
-                if (Block[0].getXpos()+100 - Block[0].getVelocity() == Block[1].getXpos() - Block[1].getVelocity()){
+            if ((Block[1].getXpos() - Block[1].getVelocity()) < (Block[0].getXpos() + 100 - Block[0].getVelocity())) {
+                double slowerV1 = 0;
+                double slowerV0 = 0;
+                boolean slower = false;
+
+                double intersectionStep1 = (Block[0].getXpos() + 100 - Block[1].getXpos()) / (Block[0].getVelocity() - Block[1].getVelocity());
+                double xposOfIntersection = Block[1].getVelocity() * intersectionStep1 + Block[1].getXpos();
+                double smaller = 0.5;
+                if (Math.abs(Block[0].getXpos() + 100 - xposOfIntersection) > smaller) {
+                    double sign = (Block[0].getXpos() - xposOfIntersection) / (Math.sqrt(Math.pow(Block[0].getXpos() - xposOfIntersection, 2)));
+                    slowerV0 = Block[0].getXpos() - sign * smaller;
+                    slowerV1 = Block[1].getXpos() + (smaller * Block[1].getVelocity()) / Block[0].getVelocity();
+                    slower = true;
+                }
+                if (slower == true) {
+                    Block[0].new_xpos(slowerV0);
+                    Block[0].new_rectangle();
+                    Block[1].new_xpos(slowerV1);
+                    Block[1].new_rectangle();
+                    render();
+                    stop = true;
+                } else {
+                    Block[0].new_xpos(xposOfIntersection - 100);
+                    Block[0].new_rectangle();
+                    Block[1].new_xpos(xposOfIntersection);
+                    Block[1].new_rectangle();
+                    nOfCollisions++;
                     calculate_new_velocity();
+                    render();
+                }
+
+                double[] graphPoints = new double[2];
+                graphPoints[0] = Block[0].getVelocity();
+                graphPoints[1] = Block[1].getVelocity();
+                points.add(graphPoints);
+                double[] graphPoints2 = new double[2];
+                graphPoints2[0] = Block[0].getXpos() + 100;
+                graphPoints2[1] = Block[1].getXpos();
+                pointsXpos.add(graphPoints2);
+            } else {
+                if (Block[0].getXpos() + 100 - Block[0].getVelocity() == Block[1].getXpos() - Block[1].getVelocity()) {
+                    calculate_new_velocity();
+                    nOfCollisions++;
+
+                    double[] graphPoints = new double[2];
+                    graphPoints[0] = Block[0].getVelocity();
+                    graphPoints[1] = Block[1].getVelocity();
+                    points.add(graphPoints);
+                    double[] graphPoints2 = new double[2];
+                    graphPoints2[0] = Block[0].getXpos() + 100;
+                    graphPoints2[1] = Block[1].getXpos();
+                    pointsXpos.add(graphPoints2);
                 }
             }
 
             if (Block[0].getXpos() - Block[0].getVelocity() < 100) {
-                toLine = -100 + Block[0].getXpos();
-                double ratio = toLine / Block[0].getVelocity();
-                newVelocity = ratio * Block[1].getVelocity();
+                if (Block[0].getXpos() - 100 > .5) {
+                    toLine = .5;
+                    noChange = true;
+                } else {
+                    toLine = Block[0].getXpos() - 100;
+                    nOfCollisions++;
+                }
+                newVelocity = (toLine * Block[1].getVelocity()) / Block[0].getVelocity();
                 closeToLine = true;
             }
 
-            if (closeToLine == false) {
-                Block[0].new_xpos(Block[0].getXpos() - Block[0].getVelocity());
-                Block[0].new_rectange();
-                Block[1].new_xpos(Block[1].getXpos() - Block[1].getVelocity());
-                Block[1].new_rectange();
-            } else {
-                Block[0].new_xpos(Block[0].getXpos() - toLine);
-                Block[0].new_rectange();
-                Block[1].new_xpos(Block[1].getXpos() - newVelocity);
-                Block[1].new_rectange();
-                Block[0].new_velocity(Block[0].getVelocity() * -1);
-                System.out.println("intersectLine");
-            }
-        }
-    }
-
-    private void collision() {
-        if (finished == false) {
-            nOfCollisions++;
-            double[] Block0Roots = new double[2];
-            double block0NewVelocity;
-            double block1NewVelocity;
-            calculate_initial_energy();
-            calculate_initial_momentum();
-
-            if (Block[1].getVelocity() >= 0) {
-                if (Block[0].getVelocity() >= 0) {
-                    if (Block[1].getVelocity() > Block[0].getVelocity()) {
-                        double a_term = (Block[0].getMass() * Block[1].getMass() + Math.pow(Block[0].getMass(), 2));
-                        double b_term = -1 * (2 * initial_momentum * Block[0].getMass());
-                        double c_term = -2 * initial_energy * Block[1].getMass() + Math.pow(initial_momentum, 2);
-
-                        Block0Roots = quadratic_equation(a_term, b_term, c_term);
-                        if (Block0Roots[0] == Block[0].getVelocity()) {
-                            block0NewVelocity = Block0Roots[1];
-                        } else {
-                            block0NewVelocity = Block0Roots[0];
-                        }
-
-                        block1NewVelocity = (initial_momentum - Block[0].getMass() * block0NewVelocity) / Block[1].getMass();
-
-                        Block[0].new_velocity(block0NewVelocity);
-                        Block[1].new_velocity(block1NewVelocity);
-
-                    } else {
+            if (stop == false) {
+                if (closeToLine == false) {
+                    Block[0].new_xpos(Block[0].getXpos() - Block[0].getVelocity());
+                    Block[0].new_rectangle();
+                    Block[1].new_xpos(Block[1].getXpos() - Block[1].getVelocity());
+                    Block[1].new_rectangle();
+                    double[] graphPoints2 = new double[2];
+                    graphPoints2[0] = Block[0].getXpos() + 100;
+                    graphPoints2[1] = Block[1].getXpos();
+                    pointsXpos.add(graphPoints2);
+                } else {
+                    Block[0].new_xpos(Block[0].getXpos() - toLine);
+                    Block[0].new_rectangle();
+                    Block[1].new_xpos(Block[1].getXpos() - newVelocity);
+                    Block[1].new_rectangle();
+                    if (noChange == false) {
                         Block[0].new_velocity(Block[0].getVelocity() * -1);
                     }
-                    double graphPoints[] = new double[2];
+                    render();
+
+                    double[] graphPoints = new double[2];
                     graphPoints[0] = Block[0].getVelocity();
                     graphPoints[1] = Block[1].getVelocity();
                     points.add(graphPoints);
-                } else {
-                    double a_term = (Block[0].getMass() * Block[1].getMass() + Math.pow(Block[0].getMass(), 2));
-                    double b_term = -1 * (2 * initial_momentum * Block[0].getMass());
-                    double c_term = -2 * initial_energy * Block[1].getMass() + Math.pow(initial_momentum, 2);
-
-                    Block0Roots = quadratic_equation(a_term, b_term, c_term);
-                    if (Block0Roots[0] == Block[0].getVelocity()) {
-                        block0NewVelocity = Block0Roots[1];
-                    } else {
-                        block0NewVelocity = Block0Roots[0];
-                    }
-
-                    block1NewVelocity = (initial_momentum - Block[0].getMass() * block0NewVelocity) / Block[1].getMass();
-
-                    Block[0].new_velocity(block0NewVelocity);
-                    Block[1].new_velocity(block1NewVelocity);
-                    double graphPoints[] = new double[2];
-                    graphPoints[0] = Block[0].getVelocity();
-                    graphPoints[1] = Block[1].getVelocity();
-                    points.add(graphPoints);
+                    double[] graphPoints2 = new double[2];
+                    graphPoints2[0] = Block[0].getXpos() + 100;
+                    graphPoints2[1] = Block[1].getXpos();
+                    pointsXpos.add(graphPoints2);
                 }
-            } else {
-                if (Block[0].getVelocity() >= 0) {
-                    Block[0].new_velocity(Block[0].getVelocity() * -1);
-                } else {
-                    if (Block[0].getVelocity() < Block[1].getVelocity()) {
-
-                        double a_term = (Block[0].getMass() * Block[1].getMass() + Math.pow(Block[0].getMass(), 2));
-                        double b_term = -1 * (2 * initial_momentum * Block[0].getMass());
-                        double c_term = -2 * initial_energy * Block[1].getMass() + Math.pow(initial_momentum, 2);
-
-                        Block0Roots = quadratic_equation(a_term, b_term, c_term);
-                        if (Block0Roots[0] == Block[0].getVelocity()) {
-                            block0NewVelocity = Block0Roots[1];
-                        } else {
-                            block0NewVelocity = Block0Roots[0];
-                        }
-
-                        block1NewVelocity = (initial_momentum - Block[0].getMass() * block0NewVelocity) / Block[1].getMass();
-
-                        Block[0].new_velocity(block0NewVelocity);
-                        Block[1].new_velocity(block1NewVelocity);
-                    } else {
-                        finished = true;
-                        nOfCollisions = nOfCollisions - 1;
-                    }
-                }
-                double graphPoints[] = new double[2];
-                graphPoints[0] = Block[0].getVelocity();
-                graphPoints[1] = Block[1].getVelocity();
-                points.add(graphPoints);
             }
-
-            System.out.println("Block[0] Velocity: " + Block[0].getVelocity());
-            System.out.println("Block[1] Velocity: " + Block[1].getVelocity());
-
-
-            collision();
         }
-
     }
 
     private void calculate_initial_energy() {
@@ -307,7 +293,7 @@ public class mathProject implements Runnable {
         return roots;
     }
 
-    public void calculate_new_velocity(){
+    public void calculate_new_velocity() {
         double[] Block0Roots = new double[2];
         double block0NewVelocity;
         double block1NewVelocity;
@@ -327,6 +313,5 @@ public class mathProject implements Runnable {
         block1NewVelocity = (initial_momentum - Block[0].getMass() * block0NewVelocity) / Block[1].getMass();
         Block[0].new_velocity(block0NewVelocity);
         Block[1].new_velocity(block1NewVelocity);
-        System.out.println("intersectBlock");
     }
 }
