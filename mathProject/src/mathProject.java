@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferStrategy;
 import java.util.ArrayList;
@@ -112,22 +113,29 @@ public class mathProject implements Runnable {
     private void render() {
 
         Graphics2D g = (Graphics2D) bufferStrategy.getDrawGraphics();
-        g.setColor(Color.WHITE);
-        g.fillRect(0, 0, 800, 800);
-        g.setColor(Color.BLACK);
-        g.drawLine(100, 100, 100, 500);
-        g.drawLine(100, 500, 700, 500);
-        g.setColor(block_0_color);
-        g.fill(Block[0].getRec());
-        g.setColor(block_1_color);
-        g.fill(Block[1].getRec());
 
-        g.drawLine(500, 300, 870, 300);
-        g.drawLine(500, 50, 500, 300);
+        if (finished == false) {
+            g.setColor(Color.WHITE);
+            g.fillRect(0, 0, 800, 800);
+            g.setColor(Color.BLACK);
+            g.drawLine(100, 100, 100, 500);
+            g.drawLine(100, 500, 700, 500);
+            g.setColor(block_0_color);
+            g.fill(Block[0].getRec());
+            g.setColor(block_1_color);
+            g.fill(Block[1].getRec());
+        }
 
-        for (double[] a : points) {
-            Rectangle2D.Double point = new Rectangle2D.Double(500 + a[0] * Math.sqrt(Block[0].getMass()), 300 + a[1] * Math.sqrt(Block[1].getMass()), 2, 2);
-            g.fill(point);
+        if (finished == true) {
+            for (int x = 0; x < points.size(); x++) {
+                double X = points.get(x)[0] * 5;
+                double Y = points.get(x)[1] * 5;
+                Rectangle2D.Double point = new Rectangle2D.Double(500 + X * Math.sqrt(Block[0].getMass()), 300 + Y * Math.sqrt(Block[1].getMass()), 2, 2);
+                g.fill(point);
+                if (x + 1 < points.size()) {
+                    g.draw(new Line2D.Double(500 + X * Math.sqrt(Block[0].getMass()), 300 + Y * Math.sqrt(Block[1].getMass()), 500 + points.get(x + 1)[0] * 5 * Math.sqrt(Block[0].getMass()), 300 + points.get(x + 1)[1] * 5 * Math.sqrt(Block[1].getMass())));
+                }
+            }
         }
 
         /*
@@ -160,6 +168,7 @@ public class mathProject implements Runnable {
         double toLine = 0;
         boolean noChange = false;
         boolean stop = false;
+
 
         if (Block[0].getVelocity() <= 0 && Block[1].getVelocity() <= 0 && Block[1].getVelocity() <= Block[0].getVelocity()) {
             finished = true;
@@ -199,16 +208,16 @@ public class mathProject implements Runnable {
                     nOfCollisions++;
                     calculate_new_velocity();
                     render();
-                }
 
-                double[] graphPoints = new double[2];
-                graphPoints[0] = Block[0].getVelocity();
-                graphPoints[1] = Block[1].getVelocity();
-                points.add(graphPoints);
-                double[] graphPoints2 = new double[2];
-                graphPoints2[0] = Block[0].getXpos() + 100;
-                graphPoints2[1] = Block[1].getXpos();
-                pointsXpos.add(graphPoints2);
+                    double[] graphPoints = new double[2];
+                    graphPoints[0] = Block[0].getVelocity();
+                    graphPoints[1] = Block[1].getVelocity();
+                    points.add(graphPoints);
+                    double[] graphPoints2 = new double[2];
+                    graphPoints2[0] = Block[0].getXpos() + 100;
+                    graphPoints2[1] = Block[1].getXpos();
+                    pointsXpos.add(graphPoints2);
+                }
             } else {
                 if (Block[0].getXpos() + 100 - Block[0].getVelocity() == Block[1].getXpos() - Block[1].getVelocity()) {
                     calculate_new_velocity();
@@ -254,13 +263,13 @@ public class mathProject implements Runnable {
                     Block[1].new_rectangle();
                     if (noChange == false) {
                         Block[0].new_velocity(Block[0].getVelocity() * -1);
+                        double[] graphPoints = new double[2];
+                        graphPoints[0] = Block[0].getVelocity();
+                        graphPoints[1] = Block[1].getVelocity();
+                        points.add(graphPoints);
                     }
                     render();
 
-                    double[] graphPoints = new double[2];
-                    graphPoints[0] = Block[0].getVelocity();
-                    graphPoints[1] = Block[1].getVelocity();
-                    points.add(graphPoints);
                     double[] graphPoints2 = new double[2];
                     graphPoints2[0] = Block[0].getXpos() + 100;
                     graphPoints2[1] = Block[1].getXpos();
