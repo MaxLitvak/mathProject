@@ -1,6 +1,5 @@
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
 
 public class block {
     private double mass;
@@ -22,6 +21,7 @@ public class block {
         height = 100;
         rec = new Rectangle2D.Double(xpos, ypos, width, height);
     }
+
     public double getMass(){ return mass; }
     public double getVelocity(){ return velocity; }
     public double getXpos(){ return xpos; }
@@ -40,6 +40,5 @@ public class block {
     }
     public void new_xpos(double tXpos){ xpos = tXpos; }
     public void new_rectangle() {rec = new Rectangle.Double(xpos, ypos, width, height); }
-
 
 }

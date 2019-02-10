@@ -31,16 +31,14 @@ public class mathProject implements Runnable {
     private int block_zero_ypos;
     private int block_one_ypos;
     private double initial_energy;
-    private double initial_momentum;
-    private int count = 0;
     private Color block_0_color;
     private Color block_1_color;
     private int nOfCollisions;
     private block[] Block;
-    private int power;
+    private double power;
     private ArrayList<double[]> points = new ArrayList<>();
-    private ArrayList<double[]> pointsXpos = new ArrayList<>();
     private boolean finished = false;
+    private double ARC_length = 0;
 
 
     public mathProject() {
@@ -82,7 +80,7 @@ public class mathProject implements Runnable {
         power = 2;
         block_one_mass = Math.pow(100, power);
         block_zero_velocity = 0;
-        block_one_velocity = .5;
+        block_one_velocity = 0.5;
         block_zero_xpos = 300;
         block_one_xpos = 500;
         block_zero_ypos = 400;
@@ -114,46 +112,101 @@ public class mathProject implements Runnable {
 
         Graphics2D g = (Graphics2D) bufferStrategy.getDrawGraphics();
 
-        if (finished == false) {
-            g.setColor(Color.WHITE);
-            g.fillRect(0, 0, 800, 800);
-            g.setColor(Color.BLACK);
-            g.drawLine(100, 100, 100, 500);
-            g.drawLine(100, 500, 700, 500);
-            g.setColor(block_0_color);
-            g.fill(Block[0].getRec());
-            g.setColor(block_1_color);
-            g.fill(Block[1].getRec());
-        }
+        g.setColor(Color.WHITE);
+        g.fillRect(0, 0, 800, 800);
+        g.setColor(Color.BLACK);
+        g.drawLine(100, 100, 100, 500);
+        g.drawLine(100, 500, 700, 500);
+        g.setColor(block_0_color);
+        g.fill(Block[0].getRec());
+        g.setColor(block_1_color);
+        g.fill(Block[1].getRec());
 
         if (finished == true) {
+            g.clearRect(0, 0, 1000, 1000);
+            g.drawLine(100, 300, 900, 300);
+            g.drawLine(500, 700, 500, 25);
             for (int x = 0; x < points.size(); x++) {
-                double X = points.get(x)[0] * 5;
-                double Y = points.get(x)[1] * 5;
-                Rectangle2D.Double point = new Rectangle2D.Double(500 + X * Math.sqrt(Block[0].getMass()), 300 + Y * Math.sqrt(Block[1].getMass()), 2, 2);
+                double ADJ = 0;
+                double OPP = 0;
+                int sizing = 45;
+                double sqrt0 = Math.sqrt(Block[0].getMass());
+                double sqrt1 = Math.sqrt(Block[1].getMass());
+                double X = points.get(x)[0] * sqrt0;
+                double Y = points.get(x)[1] * sqrt1 * -1;
+                double X2 = Math.sqrt(2 * initial_energy - (Math.pow(points.get(x)[1] * -1, 2) * Block[1].getMass()));
+                double Y2 = Math.sqrt(2 * initial_energy - (Math.pow(points.get(x)[0], 2) * Block[0].getMass()));
+                double radius = Math.sqrt(Math.pow(X, 2) + Math.pow(Y, 2));
+                double circumference = 2 * radius * Math.PI;
+                Rectangle2D.Double point = new Rectangle2D.Double(500 - X * sizing, 300 - Y * sizing, 2, 2);
+                //Rectangle2D.Double point2 = new Rectangle2D.Double(500 - sizing * X2, 300 - sizing * Y2, 2, 2);
+                g.setColor(Color.RED);
                 g.fill(point);
+                //g.fill(point2);
+
+                if (x + 1 < points.size() && x % 2 != 0) {
+                    double slope = (points.get(x + 1)[1] * -1 * sqrt1 - Y) / (points.get(x + 1)[0] * sqrt0 - X);
+                    double opp = points.get(x + 1)[0] * -1 * slope;
+                    double adj = points.get(x + 1)[0] * -1;
+                    double angle = Math.toDegrees(Math.atan((opp * -1) / adj));
+                    double arc_length = (-2 * angle * circumference) / 360;
+                    ARC_length = arc_length;
+                    ADJ = adj;
+                    OPP = opp;
+
+                    //System.out.println(angle + "   angle");
+                    System.out.println(arc_length + "  arc");
+                    //System.out.println(circumference);
+                }
+
+                if (x == 0) {
+                    double hypo = Math.sqrt(Math.pow(X, 2) + Math.pow(Y, 2));
+                    double opp = X * -1;
+                    double Angle = Math.toDegrees(Math.asin(opp / hypo));
+                    double arc_length = (Angle * circumference) / 360;
+                    //System.out.println(arc_length + " 0 to 1 arc");
+                }
+
+                if (x == points.size() - 1) {
+                    double hypo1 = Math.sqrt(Math.pow(X, 2) + Math.pow(Y, 2));
+                    double opp1 = X;
+                    double angle1 = Math.toDegrees(Math.asin(opp1 / hypo1));
+                    double hypo2 = Math.sqrt(Math.pow(points.get(x - 1)[1] * sqrt1, 2) + Math.pow(points.get(x - 1)[0] * sqrt0, 2));
+                    double opp2 = points.get(x - 1)[0] * sqrt0;
+                    double angle2 = Math.toDegrees(Math.asin(opp2 / hypo2));
+                    double nextAngle = angle2 - angle1;
+                    double arc_length = (nextAngle * circumference) / 360;
+                    //System.out.println(arc_length + " last arc     " + (Math.abs(arc_length) + points.size() * ARC_length));
+                }
+
+                //radius -> velocity * sqrt(mass)
+                //System.out.println(Math.sqrt(Math.pow(X,2) + Math.pow(Y,2)));
+                //radius -> sqrt(2 * initial_energy - opposite block energy)
+                //System.out.println(Math.sqrt(Math.pow(X2,2) + Math.pow(Y2,2)));
+///*
+                g.setColor(Color.BLACK);
+                if (X * sqrt0 < 0) {
+                    g.drawString(Integer.toString(x + 1), (int) (500 - X * sizing) + 5, (int) (300 - Y * sizing));
+                } else {
+                    g.drawString(Integer.toString(x + 1), (int) (500 - X * sizing) - 15, (int) (300 - Y * sizing));
+                }
+//*/
                 if (x + 1 < points.size()) {
-                    g.draw(new Line2D.Double(500 + X * Math.sqrt(Block[0].getMass()), 300 + Y * Math.sqrt(Block[1].getMass()), 500 + points.get(x + 1)[0] * 5 * Math.sqrt(Block[0].getMass()), 300 + points.get(x + 1)[1] * 5 * Math.sqrt(Block[1].getMass())));
+                    if (X * -1 == points.get(x + 1)[0]) {
+                        g.setColor(Color.GREEN);
+                    } else {
+                        g.setColor(Color.BLUE);
+                    }
+                    g.draw(new Line2D.Double(500 - X * sizing, 300 - Y * sizing, 500 - points.get(x + 1)[0] * sqrt0 * sizing, 300 - points.get(x + 1)[1] * -1 * sqrt1 * sizing));
+                }
+                if (x == 15) {
+                    g.setColor(Color.RED);
+                    g.draw(new Line2D.Double(500, 300+ Y * -sizing, 500 + ADJ * -sizing, 300+ Y * -sizing));
+                    g.setColor(Color.MAGENTA);
+                    g.draw(new Line2D.Double(500, 300 + Y * -sizing, 500, 300 + Y*-sizing + OPP * sizing));
                 }
             }
         }
-
-        /*
-        if (finished == true) {
-            g.clearRect(0, 0, 800, 800);
-            g.drawLine(500, 300, 870, 300);
-            g.drawLine(500, 50, 500, 300);
-            System.out.println("finished");
-            double Count = 0;
-            for (double[] a : pointsXpos) {
-                Count += 0.07;
-                Rectangle2D.Double point = new Rectangle2D.Double(500 + Count, 300 + (a[0] / 5), 2, 2);
-                g.fill(point);
-                Rectangle2D.Double point2 = new Rectangle2D.Double(500 + Count, 300 + (a[1] / 5), 2, 2);
-                //g.fill(point2);
-            }
-        }
-        */
 
         g.dispose();
 
@@ -170,13 +223,10 @@ public class mathProject implements Runnable {
         boolean stop = false;
 
 
-        if (Block[0].getVelocity() <= 0 && Block[1].getVelocity() <= 0 && Block[1].getVelocity() <= Block[0].getVelocity()) {
+        if (Block[0].getVelocity() <= 0 && Block[1].getVelocity() <= 0 && Block[1].getVelocity() <= Block[0].getVelocity() && Block[1].getXpos() - Block[0].getXpos() > 200) {
             finished = true;
-            if (count != 5) {
-                count++;
-            }
         }
-        if (count == 5) {
+        if (finished == true) {
 
         } else {
             if ((Block[1].getXpos() - Block[1].getVelocity()) < (Block[0].getXpos() + 100 - Block[0].getVelocity())) {
@@ -213,10 +263,6 @@ public class mathProject implements Runnable {
                     graphPoints[0] = Block[0].getVelocity();
                     graphPoints[1] = Block[1].getVelocity();
                     points.add(graphPoints);
-                    double[] graphPoints2 = new double[2];
-                    graphPoints2[0] = Block[0].getXpos() + 100;
-                    graphPoints2[1] = Block[1].getXpos();
-                    pointsXpos.add(graphPoints2);
                 }
             } else {
                 if (Block[0].getXpos() + 100 - Block[0].getVelocity() == Block[1].getXpos() - Block[1].getVelocity()) {
@@ -227,10 +273,6 @@ public class mathProject implements Runnable {
                     graphPoints[0] = Block[0].getVelocity();
                     graphPoints[1] = Block[1].getVelocity();
                     points.add(graphPoints);
-                    double[] graphPoints2 = new double[2];
-                    graphPoints2[0] = Block[0].getXpos() + 100;
-                    graphPoints2[1] = Block[1].getXpos();
-                    pointsXpos.add(graphPoints2);
                 }
             }
 
@@ -252,10 +294,6 @@ public class mathProject implements Runnable {
                     Block[0].new_rectangle();
                     Block[1].new_xpos(Block[1].getXpos() - Block[1].getVelocity());
                     Block[1].new_rectangle();
-                    double[] graphPoints2 = new double[2];
-                    graphPoints2[0] = Block[0].getXpos() + 100;
-                    graphPoints2[1] = Block[1].getXpos();
-                    pointsXpos.add(graphPoints2);
                 } else {
                     Block[0].new_xpos(Block[0].getXpos() - toLine);
                     Block[0].new_rectangle();
@@ -269,11 +307,6 @@ public class mathProject implements Runnable {
                         points.add(graphPoints);
                     }
                     render();
-
-                    double[] graphPoints2 = new double[2];
-                    graphPoints2[0] = Block[0].getXpos() + 100;
-                    graphPoints2[1] = Block[1].getXpos();
-                    pointsXpos.add(graphPoints2);
                 }
             }
         }
@@ -283,43 +316,15 @@ public class mathProject implements Runnable {
         Block[0].calculate_kinetic_energy();
         Block[1].calculate_kinetic_energy();
         initial_energy = Block[0].getKineticEnergy() + Block[1].getKineticEnergy();
-
-    }
-
-    private void calculate_initial_momentum() {
-        Block[0].calculate_momentum();
-        Block[1].calculate_momentum();
-        initial_momentum = Block[0].getMomentum() + Block[1].getMomentum();
-
-    }
-
-    private double[] quadratic_equation(double a, double b, double c) {
-        double[] roots = new double[2];
-        double d;
-        d = b * b - 4 * a * c;
-        roots[0] = (-b + Math.sqrt(d)) / (2 * a);
-        roots[1] = (-b - Math.sqrt(d)) / (2 * a);
-        return roots;
     }
 
     public void calculate_new_velocity() {
-        double[] Block0Roots = new double[2];
         double block0NewVelocity;
         double block1NewVelocity;
         calculate_initial_energy();
-        calculate_initial_momentum();
 
-        double a_term = (Block[0].getMass() * Block[1].getMass() + Math.pow(Block[0].getMass(), 2));
-        double b_term = -1 * (2 * initial_momentum * Block[0].getMass());
-        double c_term = -2 * initial_energy * Block[1].getMass() + Math.pow(initial_momentum, 2);
-
-        Block0Roots = quadratic_equation(a_term, b_term, c_term);
-        if (Block0Roots[0] == Block[0].getVelocity()) {
-            block0NewVelocity = Block0Roots[1];
-        } else {
-            block0NewVelocity = Block0Roots[0];
-        }
-        block1NewVelocity = (initial_momentum - Block[0].getMass() * block0NewVelocity) / Block[1].getMass();
+        block1NewVelocity = (Block[1].getMass() * Block[1].getVelocity() - Block[0].getMass() * (Block[1].getVelocity() - 2 * Block[0].getVelocity())) / (Block[0].getMass() + Block[1].getMass());
+        block0NewVelocity = block1NewVelocity + Block[1].getVelocity() - Block[0].getVelocity();
         Block[0].new_velocity(block0NewVelocity);
         Block[1].new_velocity(block1NewVelocity);
     }
