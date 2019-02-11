@@ -7,18 +7,21 @@ import java.util.ArrayList;
 
 /*
 This is a simulation of two blocks of different mass and velocity colliding on a frictionless floor and with purely
-elastic collisions, which means that no energy is lost among colliding. The main class is MathBlocks, which runs the
+elastic collisions, which means that no energy is lost among colliding. The main class is mathProject, which runs the
 simulation with the help of the Blocks class, which constructs two Blocks, each with its own mass and velocity. For
-this simulation, Block[0] is the at first stationary block with the smaller mass and Block[1] is the first moving block
-with the bigger mass. This program is completely object oriented, meaning that one must call methods from another class
-in order to access its variables. For example, to access a block's mass, one must call the public method "getMass()"
-of the Blocks class as opposed to calling the variable itself. This is because the block's variables are all private
-and its methods public, meaning that a class only has access to the other class' methods, not its variables. In this
-simulation, the velocity vectors are negative to the right and positive to the left, so Block[1] has an initially
-positive velocity.
+this simulation, Block[0] is the at first stationary block and Block[1] is the first moving block. In this
+simulation, the velocity vectors are negative to the left and positive to the right, so Block[1] has an initially
+negative velocity. I commented above all of the important lines, telling you what they do. You can also change some of
+the variables to see the effects on the circle. When you run the program, after the blocks have finished colliding,
+a graph will pop up. I recommend that if you want to look at it for more than about 10 seconds, take a screen shot and close
+the applet to prevent you computer from working too hard.
  */
 
+// implementing runnable makes it so the program requires a method called "run" which starts when the applet is opened
 public class mathProject implements Runnable {
+
+    // variables
+
     JFrame frame;
     Canvas canvas;
     BufferStrategy bufferStrategy;
@@ -39,6 +42,7 @@ public class mathProject implements Runnable {
     private ArrayList<double[]> points = new ArrayList<>();
     private boolean finished = false;
     private double ARC_length = 0;
+    private boolean STOP = false;
 
 
     public mathProject() {
@@ -68,6 +72,7 @@ public class mathProject implements Runnable {
 
     public static void main(String[] args) {
         mathProject ex = new mathProject();
+        // make new thread
         new Thread(ex).start();
     }
 
@@ -77,15 +82,20 @@ public class mathProject implements Runnable {
         block_0_color = new Color(170, 170, 170); // Color white
         block_1_color = new Color(50, 50, 50);
         block_zero_mass = 1;
-        power = 2;
+        // change the power to change the mass of Block[1]. The number of digits of pi in the number of collisions is equal to
+        // power+1
+        power = 1;
         block_one_mass = Math.pow(100, power);
         block_zero_velocity = 0;
+        // if you change the starting velocity of Block[1], the circumference of the circle will change but this will not effect
+        // the number of collisions
         block_one_velocity = 0.5;
         block_zero_xpos = 300;
         block_one_xpos = 500;
         block_zero_ypos = 400;
         block_one_ypos = 400;
         Block = new block[2];
+        // creating blocks
         Block[0] = new block(block_zero_mass, block_zero_velocity, block_zero_xpos, block_zero_ypos);
         Block[1] = new block(block_one_mass, block_one_velocity, block_one_xpos, block_one_ypos);
 
@@ -95,10 +105,11 @@ public class mathProject implements Runnable {
             render();
             // moves blocks
             moveEverything();
-            System.out.println(nOfCollisions);
+            // prints the number of collisions
+            System.out.println("number of collisions   "+nOfCollisions);
 
 
-            //sleep
+            // sleep - this statement controls the speed of the program
             try {
                 Thread.sleep(1);
             } catch (InterruptedException e) {
@@ -124,27 +135,49 @@ public class mathProject implements Runnable {
 
         if (finished == true) {
             g.clearRect(0, 0, 1000, 1000);
+
+            // creating the axes
             g.drawLine(100, 300, 900, 300);
             g.drawLine(500, 700, 500, 25);
+
             for (int x = 0; x < points.size(); x++) {
+
+                // declaring instance variables (only can be accessed inside of this for loop)
                 double ADJ = 0;
                 double OPP = 0;
+                // this variable is very important because it puts the circle into perspective. For a power of 0 and 1, you
+                // can use 45 but for a power of 2, I would use 7. I have not tried any powers greater than 2 and I don't recommend
+                // it unless you want your computer's fan to get really loud. Because the program continuously renders, the computer
+                // works really hard to do all of these calculations at a very fast speed
                 int sizing = 45;
                 double sqrt0 = Math.sqrt(Block[0].getMass());
                 double sqrt1 = Math.sqrt(Block[1].getMass());
+                // X and Y are the coordinates for the graph. X2 and Y2 are also coordinates but they are expressed differently
+                // if you switch out X for X2 or Y for Y2, the results will be the same but will only show up in one of the
+                // quadrants in the graph because of the issue of square rooting negative
+                // numbers. I have them to show that the algebra I did in algebra_2 in my attached folder is correct.
                 double X = points.get(x)[0] * sqrt0;
                 double Y = points.get(x)[1] * sqrt1 * -1;
                 double X2 = Math.sqrt(2 * initial_energy - (Math.pow(points.get(x)[1] * -1, 2) * Block[1].getMass()));
                 double Y2 = Math.sqrt(2 * initial_energy - (Math.pow(points.get(x)[0], 2) * Block[0].getMass()));
+                // radius of the circle
                 double radius = Math.sqrt(Math.pow(X, 2) + Math.pow(Y, 2));
+                // print radius
+                System.out.println("radius   "+radius);
+                // circumference of the circle
                 double circumference = 2 * radius * Math.PI;
-                Rectangle2D.Double point = new Rectangle2D.Double(500 - X * sizing, 300 - Y * sizing, 2, 2);
-                //Rectangle2D.Double point2 = new Rectangle2D.Double(500 - sizing * X2, 300 - sizing * Y2, 2, 2);
-                g.setColor(Color.RED);
-                g.fill(point);
-                //g.fill(point2);
+                // print circumference
+                System.out.println("circumference    "+circumference);
 
-                if (x + 1 < points.size() && x % 2 != 0) {
+                // point is a very small rectangle that will plot on the graph
+                Rectangle2D.Double point = new Rectangle2D.Double(500 - X * sizing, 300 - Y * sizing, 2, 2);
+                g.setColor(Color.RED);
+                // draws "point"
+                g.fill(point);
+
+                // this if statement says that if a point is not the last one in the arraylist and it is odd, then find the
+                // angle between the slanted line and constant line that intersect it
+                if (x + 1 < points.size() && x % 2 == 0) {
                     double slope = (points.get(x + 1)[1] * -1 * sqrt1 - Y) / (points.get(x + 1)[0] * sqrt0 - X);
                     double opp = points.get(x + 1)[0] * -1 * slope;
                     double adj = points.get(x + 1)[0] * -1;
@@ -154,19 +187,12 @@ public class mathProject implements Runnable {
                     ADJ = adj;
                     OPP = opp;
 
-                    //System.out.println(angle + "   angle");
-                    System.out.println(arc_length + "  arc");
-                    //System.out.println(circumference);
+                    // prints the angle and then the arc length
+                    System.out.println((2 * Math.PI * angle) / 360 + "   angle");
+                    System.out.println(arc_length + "  arc length");
                 }
 
-                if (x == 0) {
-                    double hypo = Math.sqrt(Math.pow(X, 2) + Math.pow(Y, 2));
-                    double opp = X * -1;
-                    double Angle = Math.toDegrees(Math.asin(opp / hypo));
-                    double arc_length = (Angle * circumference) / 360;
-                    //System.out.println(arc_length + " 0 to 1 arc");
-                }
-
+                // this if statement finds the missing arc length between the second to last and last point on the graph
                 if (x == points.size() - 1) {
                     double hypo1 = Math.sqrt(Math.pow(X, 2) + Math.pow(Y, 2));
                     double opp1 = X;
@@ -176,21 +202,21 @@ public class mathProject implements Runnable {
                     double angle2 = Math.toDegrees(Math.asin(opp2 / hypo2));
                     double nextAngle = angle2 - angle1;
                     double arc_length = (nextAngle * circumference) / 360;
-                    //System.out.println(arc_length + " last arc     " + (Math.abs(arc_length) + points.size() * ARC_length));
+
+                    // this line shows that there is a small piece missing from circle that is not accounted for in the arcs derived
+                    // from the angles between intersecting lines
+                    System.out.println("arc lengths add up to circumference " + (Math.abs(arc_length) + points.size() * ARC_length));
                 }
 
-                //radius -> velocity * sqrt(mass)
-                //System.out.println(Math.sqrt(Math.pow(X,2) + Math.pow(Y,2)));
-                //radius -> sqrt(2 * initial_energy - opposite block energy)
-                //System.out.println(Math.sqrt(Math.pow(X2,2) + Math.pow(Y2,2)));
-///*
+                // draws numbers next to the points that correspond to collisions (2 is the first collision)
                 g.setColor(Color.BLACK);
                 if (X * sqrt0 < 0) {
                     g.drawString(Integer.toString(x + 1), (int) (500 - X * sizing) + 5, (int) (300 - Y * sizing));
                 } else {
                     g.drawString(Integer.toString(x + 1), (int) (500 - X * sizing) - 15, (int) (300 - Y * sizing));
                 }
-//*/
+
+                // draws the lines between points - green for constant lines and blue for sloped lines
                 if (x + 1 < points.size()) {
                     if (X * -1 == points.get(x + 1)[0]) {
                         g.setColor(Color.GREEN);
@@ -199,7 +225,10 @@ public class mathProject implements Runnable {
                     }
                     g.draw(new Line2D.Double(500 - X * sizing, 300 - Y * sizing, 500 - points.get(x + 1)[0] * sqrt0 * sizing, 300 - points.get(x + 1)[1] * -1 * sqrt1 * sizing));
                 }
-                if (x == 15) {
+
+                // if you run the program with a power of 1, this highlights the sides that I used to derive the angle between
+                // lines
+                if (x == 16) {
                     g.setColor(Color.RED);
                     g.draw(new Line2D.Double(500, 300+ Y * -sizing, 500 + ADJ * -sizing, 300+ Y * -sizing));
                     g.setColor(Color.MAGENTA);
@@ -213,8 +242,17 @@ public class mathProject implements Runnable {
         bufferStrategy.show();
     }
 
-    // moves the blocks and counts collisions
+    // moves the blocks and counts collisions. This method was really annoying to write and there is nothing in it
+    // to change so I won't comment it to show you what it is doing
     private void moveEverything() {
+
+        if (STOP == false) {
+            double[] graphPoints = new double[2];
+            graphPoints[0] = Block[0].getVelocity();
+            graphPoints[1] = Block[1].getVelocity();
+            points.add(graphPoints);
+            STOP = true;
+        }
 
         double newVelocity = 0;
         boolean closeToLine = false;
@@ -312,12 +350,15 @@ public class mathProject implements Runnable {
         }
     }
 
+    // calculates the energy of the system
     private void calculate_initial_energy() {
         Block[0].calculate_kinetic_energy();
         Block[1].calculate_kinetic_energy();
         initial_energy = Block[0].getKineticEnergy() + Block[1].getKineticEnergy();
     }
 
+    // using the equations that I derived in algebra_1 in the attached folder, this method calculates the new velocities of the
+    // blocks after each collision
     public void calculate_new_velocity() {
         double block0NewVelocity;
         double block1NewVelocity;
