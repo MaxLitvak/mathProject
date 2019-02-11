@@ -7,14 +7,14 @@ import java.util.ArrayList;
 
 /*
 This is a simulation of two blocks of different mass and velocity colliding on a frictionless floor and with purely
-elastic collisions, which means that no energy is lost among colliding. The main class is mathProject, which runs the
-simulation with the help of the Blocks class, which constructs two Blocks, each with its own mass and velocity. For
-this simulation, Block[0] is the at first stationary block and Block[1] is the first moving block. In this
+elastic collisions which means that no energy is lost among during collisions. The main class is mathProject which runs the
+simulation with the help of the Blocks class which constructs two Blocks, each with its own mass and velocity. For
+this simulation, Block[0] is the first stationary block and Block[1] is the first moving block. In this
 simulation, the velocity vectors are negative to the left and positive to the right, so Block[1] has an initially
 negative velocity. I commented above all of the important lines, telling you what they do. You can also change some of
 the variables to see the effects on the circle. When you run the program, after the blocks have finished colliding,
 a graph will pop up. I recommend that if you want to look at it for more than about 10 seconds, take a screen shot and close
-the applet to prevent you computer from working too hard.
+the applet to prevent your computer from working too hard.
  */
 
 // implementing runnable makes it so the program requires a method called "run" which starts when the applet is opened
