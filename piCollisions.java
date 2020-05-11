@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 /*
 This is a simulation of two blocks of different mass and velocity colliding on a frictionless floor and with purely
-elastic collisions which means that no energy is lost among during collisions. The main class is mathProject which runs the
+elastic collisions which means that no energy is lost among during collisions. The main class is piCollisions which runs the
 simulation with the help of the Blocks class which constructs two Blocks, each with its own mass and velocity. For
 this simulation, Block[0] is the first stationary block and Block[1] is the first moving block. In this
 simulation, the velocity vectors are negative to the left and positive to the right, so Block[1] has an initially
@@ -17,7 +17,7 @@ a graph will pop up. I recommend that if you want to look at it for more than ab
 the applet to prevent your computer from working too hard.
  */
 
-public class mathProject implements Runnable {
+public class piCollisions implements Runnable {
 
     // variables
 
@@ -44,7 +44,7 @@ public class mathProject implements Runnable {
     private boolean STOP = false;
     private boolean stopRender = false;
 
-    public mathProject() {
+    public piCollisions() {
         frame = new JFrame("Basic Game");
 
         JPanel panel = (JPanel) frame.getContentPane();
@@ -70,7 +70,7 @@ public class mathProject implements Runnable {
     }
 
     public static void main(String[] args) {
-        mathProject ex = new mathProject();
+        piCollisions ex = new piCollisions();
         // make new thread
         new Thread(ex).start();
     }
