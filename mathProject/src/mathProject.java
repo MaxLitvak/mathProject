@@ -17,7 +17,6 @@ a graph will pop up. I recommend that if you want to look at it for more than ab
 the applet to prevent your computer from working too hard.
  */
 
-// implementing runnable makes it so the program requires a method called "run" which starts when the applet is opened
 public class mathProject implements Runnable {
 
     // variables
@@ -43,7 +42,7 @@ public class mathProject implements Runnable {
     private boolean finished = false;
     private double ARC_length = 0;
     private boolean STOP = false;
-
+    private boolean stopRender = false;
 
     public mathProject() {
         frame = new JFrame("Basic Game");
@@ -101,8 +100,10 @@ public class mathProject implements Runnable {
 
 
         while (true) {
-            // paint the graphics
-            render();
+            if (!stopRender) {
+                // paint the graphics
+                render();
+            }
             // moves blocks
             moveEverything();
             // prints the number of collisions
@@ -235,6 +236,7 @@ public class mathProject implements Runnable {
                     g.draw(new Line2D.Double(500, 300 + Y * -sizing, 500, 300 + Y*-sizing + OPP * sizing));
                 }
             }
+            stopRender = true;
         }
 
         g.dispose();
